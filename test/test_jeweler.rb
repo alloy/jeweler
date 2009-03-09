@@ -5,17 +5,16 @@ class TestJeweler < Test::Unit::TestCase
   def setup
     @now = Time.now
     stub(Time).now { @now }
-
-    FileUtils.rm_rf("#{File.dirname(__FILE__)}/tmp")
+    remove_tmpdir!
   end
 
   def teardown
-    FileUtils.rm_rf("#{File.dirname(__FILE__)}/tmp")
+    remove_tmpdir!
   end
 
   context "Initializing jewewler in a blank directory" do
     setup do
-      FileUtils.mkdir_p(tmp_dir)
+      create_tmpdir!
       @jeweler = Jeweler.new(build_spec, tmp_dir)
     end
 
@@ -24,11 +23,10 @@ class TestJeweler < Test::Unit::TestCase
     end
   end
 
-
   context "A Jeweler with a VERSION.yml" do
     setup do
       FileUtils.cp_r(fixture_dir, tmp_dir)
-      
+
       @jeweler = Jeweler.new(build_spec, tmp_dir)
       @jeweler.output = StringIO.new
     end
@@ -61,33 +59,10 @@ class TestJeweler < Test::Unit::TestCase
       should_bump_version 2, 0, 0
     end
 
-    should "should populate gemspec's files" do
-      assert ! @jeweler.gemspec.files.empty?
-    end
-
-    context "with standard 'files' specified" do
-      setup do
-        @alt_jeweler = Jeweler.new(build_spec("[A-Z]*.*", "{bin,generators,lib,test,spec}/**/*"), tmp_dir)
+    context "with a gemspec extended with Jeweler::Specification" do
+      should "set defaults" do
+        assert_equal %w{ foo_the_ultimate_bin }, @jeweler.gemspec.executables
       end
-      
-      should "have the same files as when no 'files' are specified" do
-        assert_equal @jeweler.gemspec.files, @alt_jeweler.gemspec.files
-      end
-    end
-
-    context "gemsepc's rdoc" do
-      should 'have be enabled' do
-        assert @jeweler.gemspec.has_rdoc
-      end
-
-      should 'do inline source' do
-        assert @jeweler.gemspec.rdoc_options.include?('--inline-source')
-      end
-
-      should 'be utf-8' do
-        assert @jeweler.gemspec.rdoc_options.include?('--charset=UTF-8')
-      end
-
     end
 
     context "writing the gemspec" do

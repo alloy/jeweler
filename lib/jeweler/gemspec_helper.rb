@@ -19,11 +19,11 @@ class Jeweler
         false
       end
     end
-    
+
     def write
       File.open(path, 'w') do |f|
         f.write @spec.to_ruby
-      end 
+      end
     end
 
     def path
@@ -35,7 +35,7 @@ class Jeweler
     def parse
       data = File.read(path)
       parsed_gemspec = nil
-      Thread.new { parsed_gemspec = eval("$SAFE = 3\n#{data}", binding, path) }.join 
+      Thread.new { parsed_gemspec = eval("$SAFE = 3\n#{data}", binding, path) }.join
       parsed_gemspec
     end
 
